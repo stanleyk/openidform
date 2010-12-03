@@ -20,8 +20,7 @@ final class DefaultPresenter extends Nette\Application\Presenter
 	 * OpenID Form control factory.
 	 * @return mixed
 	 */
-	public function createComponentOpenIDForm()
-	{
+	public function createComponentOpenIDForm() {
 		$oid = new \OpenIDForm\OpenIDForm();
 		$oid->setRequired( 'contact/email' );
 		$oid->setOptional( 'namePerson/friendly' );
