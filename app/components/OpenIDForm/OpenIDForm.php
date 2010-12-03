@@ -5,7 +5,7 @@
  *
  * Copyright (c) 2010 Stanislav Kocanda (http://www.stanleyk.net)
  *
- * License: MIT
+ * @license http://www.opensource.org/licenses/mit-license.php MIT
  *
  */
 
