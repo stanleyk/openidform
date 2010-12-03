@@ -1,0 +1,28 @@
+body {
+	font: 14px/1.5 "Trebuchet MS", "Geneva CE", lucida, sans-serif;
+	color: #000;
+	background-color: #fff;
+}
+
+div.flash {
+	color: black;
+	background: #FFF9D7;
+	border: 1px solid #E2C822;
+	padding: 1em;
+	margin: 1em 0;
+}
+
+img {
+	border : none;
+}
+
+input {
+	background : #fff url( '../images/openid-icon.gif' ) no-repeat 4px center;
+	border : 1px solid #666;
+	padding : 0 0 0 25px;
+}
+
+input.button {
+	background : #666;
+	padding : 2px;
+}
