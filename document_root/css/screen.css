@@ -16,7 +16,7 @@ img {
 	border : none;
 }
 
-input {
+input#frmidentifierForm-openid_identifier {
 	background : #fff url( '../images/openid-icon.gif' ) no-repeat 4px center;
 	border : 1px solid #666;
 	padding : 0 0 0 25px;
