@@ -33,6 +33,9 @@ $application = Environment::getApplication();
 $application->errorPresenter = 'Error';
 //$application->catchExceptions = TRUE;
 
+// 3b) establish database connection
+dibi::connect(Environment::getConfig('database')); 
+
 
 // Step 4: Setup application router
 $router = $application->getRouter();

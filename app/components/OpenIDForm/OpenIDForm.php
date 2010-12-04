@@ -29,15 +29,16 @@ class OpenIDForm extends Nette\Application\Control
 	const PROCESS_SIGNAL = 'process';
 
 	/** @var array of function(void);
-	 *  Occurs when the user cancels OpenID authentication */
+	 *  These functions are called when the user cancels the OpenID 
+     *  authentication */
 	public $onCancel;
 
 	/** @var array of function(void);
-	 *  Occurs when the user authentication fails */
+	 *  These functions are called when the user authentication fails */
 	public $onInvalid;
 
 	/** @var array of function($identity, $attributes);
-	 *  Occurs when the user authentication succeeds */
+	 *  These functions are called when the user authentication succeeds */
 	public $onValid;
 
 	/** @var LightOpenID */

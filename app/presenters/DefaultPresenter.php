@@ -20,6 +20,7 @@ final class DefaultPresenter extends Nette\Application\Presenter
 	 * OpenID Form control factory.
 	 * @return mixed
 	 */
+
 	public function createComponentOpenIDForm() {
 		$oid = new \OpenIDForm\OpenIDForm();
 		$oid->setRequired( 'contact/email' );
@@ -36,9 +37,13 @@ final class DefaultPresenter extends Nette\Application\Presenter
 	 * @param array
 	 */
 	public function validOpenID( $identity, $attributes ) {
-		$this->template->msg = 
-			'You have successfuly logged in as ' . $identity;
-		$this->template->attributes = $attributes;
+		try {
+            $this->user->login(array($identity));
+			$this->redirect('this');
+		} catch (Nette\Security\AuthenticationException $e) {
+			//$this->redirect('firstTimeHere');
+		}
+
 	}
 
 	/**
