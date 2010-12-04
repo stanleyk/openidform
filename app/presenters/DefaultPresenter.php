@@ -7,6 +7,9 @@
  */
 
 use \Nette;
+use \Nette\Debug;
+use \Nette\Environment;
+use Nette\Application\AppForm;
 use \OpenIDForm;
 
 /**
@@ -16,18 +19,34 @@ use \OpenIDForm;
  */
 final class DefaultPresenter extends Nette\Application\Presenter
 {
+	const AX_NICKNAME = 'namePerson/friendly';
+
+	public function renderLogged() {
+		$user = Environment::getUser();
+		$this->template->user = $user->getIdentity();
+	}
+
+	public function renderRegister() {
+		$oidsession = Environment::getSession( 'openid' );
+		$nickname = '';
+		if ( isset( $oidsession->attributes[ self::AX_NICKNAME ] ) ) {
+			$nickname = $oidsession->attributes[ self::AX_NICKNAME ];
+		}
+		if ( ! isset( $oidsession->identity ) ) {
+			throw Exception( 'Lost session!' );
+		}
+		$this->template->nickname = ( ! empty( $nickname ) ) ?
+			$nickname : $oidsession->identity;
+	}
+
 	/**
 	 * OpenID Form control factory.
 	 * @return mixed
 	 */
-
 	public function createComponentOpenIDForm() {
 		$oid = new \OpenIDForm\OpenIDForm();
-		$oid->setRequired( 'contact/email' );
-		$oid->setOptional( 'namePerson/friendly' );
-		$oid->onValid[] = callback( $this, 'validOpenID' );
-		$oid->onInvalid[] = callback( $this, 'invalidOpenID' );
-		$oid->onCancel[] = callback( $this, 'cancelledOpenID' );
+		$oid->setRequired( self::AX_NICKNAME );
+		$oid->onSignin[] = callback( $this, 'openIDSigned' );
 		return $oid;
 	}
 
@@ -36,27 +55,50 @@ final class DefaultPresenter extends Nette\Application\Presenter
 	 * @param string
 	 * @param array
 	 */
-	public function validOpenID( $identity, $attributes ) {
+	public function openIDSigned( $identity, $attributes ) {
 		try {
-            $this->user->login(array($identity));
-			$this->redirect('this');
-		} catch (Nette\Security\AuthenticationException $e) {
-			//$this->redirect('firstTimeHere');
+            $this->user->login( array( $identity ) );
+			$this->redirect( 'logged' );
 		}
-
+		catch ( Nette\Security\AuthenticationException $e ) {
+			$oidsession = Environment::getSession( 'openid' );
+			$oidsession->identity = $identity;
+			$oidsession->attributes = $attributes;
+			$this->redirect( 'register' );
+		}
 	}
 
 	/**
-	 * Failed login callback.
+	 * Create the register form
 	 */
-	public function invalidOpenID() {
-		$this->template->msg = 'You have not logged in!';
+	public function createComponentRegisterForm() {
+		$oidsession = Environment::getSession( 'openid' );
+		$nickname = '';
+		if ( isset( $oidsession->attributes[ self::AX_NICKNAME ] ) ) {
+			$nickname = $oidsession->attributes[ self::AX_NICKNAME ];
+		}
+		if ( ! isset( $oidsession->identity ) ) {
+			throw Exception( 'Lost session!' );
+		}
+		$form = new AppForm;
+		$form->addText( 'nickname', 'Your nickname:')
+			->addRule( Nette\Forms\Form::FILLED, 'Please fill in your nickname!' )
+			->setDefaultValue( $nickname );
+		$form->addHidden( 'openid' )
+			->setValue( $oidsession->identity );
+		$form->addSubmit( 'register', 'Register' );
+		$form->onSubmit[] = array( $this, 'processRegister' );
+		return $form;
 	}
 
 	/**
-	 * Cancelled login callback.
+	 * The register form onSubmit function
+	 * @param AppForm
 	 */
-	public function cancelledOpenID() {
-		$this->template->msg = 'You have cancelled logging in!';
+	public function processRegister( AppForm $form ) {
+		$values = $form->values;
+		\Model\Users::register( $values );
+		$this->user->login( $array( $values['openid'] ) );
+		$this->redirect( 'logged' );
 	}
 }

@@ -1,22 +1,24 @@
 <?php
 
 namespace Model;
-use \Nette;
-use \Nette\Security;
+
+use dibi;
+use Nette;
+use Nette\Security;
 
 class Users extends Nette\Object implements Security\IAuthenticator
 {
-    private $users_table = 'users';
-    private $ids_table   = 'openids';
+    const USERS_TABLE = 'users';
+    const IDS_TABLE = 'openids';
 
-    public function authenticate(array $credentials) {
+    public function authenticate( array $credentials ) {
 
-        $openid = $credentials[self::USERNAME];
+        $openid = $credentials[ self::USERNAME ];
 
-        $row = \dibi::select('*')
-                ->from($this->users_table)
-                ->innerJoin($this->ids_table)
-                ->where('openid=%s', $openid)
+        $row = dibi::select('*')
+                ->from( self::USERS_TABLE )
+                ->innerJoin( self::IDS_TABLE )
+                ->where( 'openid=%s', $openid )
                 ->fetch();
 
         if (!$row) {
@@ -26,5 +28,17 @@ class Users extends Nette\Object implements Security\IAuthenticator
 
         return new Security\Identity($row->id, NULL, $row);
     }
-}
 
+	public static function register( $values ) {
+		$data = array(
+			'nickname' => $values[ 'nickname' ],
+		);
+		dibi::insert( self::USERS_TABLE, $data )->execute();
+		$userid = dibi::getInsertId();
+		$data = array(
+			'openid' => $values[ 'openid' ],
+			'user_id' => $userid,
+		);
+		dibi::insert( self::IDS_TABLE, $data )->execute();
+	}
+}

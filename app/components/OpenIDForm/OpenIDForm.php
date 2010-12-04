@@ -28,21 +28,18 @@ class OpenIDForm extends Nette\Application\Control
 	/** name of the signal processing OP redirection */
 	const PROCESS_SIGNAL = 'process';
 
-	/** @var array of function(void);
-	 *  These functions are called when the user cancels the OpenID 
-     *  authentication */
-	public $onCancel;
-
-	/** @var array of function(void);
-	 *  These functions are called when the user authentication fails */
-	public $onInvalid;
+	/** name of the form component */
+	const FORM_COMPONENT = 'identifierForm';
 
 	/** @var array of function($identity, $attributes);
 	 *  These functions are called when the user authentication succeeds */
-	public $onValid;
+	public $onSignin;
 
 	/** @var LightOpenID */
 	protected $openid;
+
+	/** @var Nette\ITranslator */
+	private $translator;
 
 	/**
 	 * Component constructor.
@@ -60,7 +57,8 @@ class OpenIDForm extends Nette\Application\Control
 	/**
 	 * Sets required fields in the AX format.
 	 * Accepts either string or an array of strings
-	 * @param  mixed 
+	 * @param  string|array 
+	 * @return OpenIDForm provides a fluent interface
 	 */
 	public function setRequired( $required ) {
 		if ( is_array( $required ) ) {
@@ -72,12 +70,14 @@ class OpenIDForm extends Nette\Application\Control
 		else {
 			$this->openid->required[] = $required;
 		}
+		return $this;
 	}
 
 	/**
 	 * Sets optional fields in the AX format.
 	 * Accepts either string or an array of strings
-	 * @param  mixed 
+	 * @param  string|array 
+	 * @return OpenIDForm provides a fluent interface
 	 */
 	public function setOptional( $optional ) {
 		if ( is_array( $optional ) ) {
@@ -89,6 +89,26 @@ class OpenIDForm extends Nette\Application\Control
 		else {
 			$this->openid->optional[] = $optional;
 		}
+		return $this;
+	}
+
+	/**
+	 * Set translate adapter 
+	 * @param Nette\Itranslator
+	 * @return OpenIDForm provides a fluent interface
+	 */
+	public function setTranslator( Nette\ITranslator $translator = NULL ) { 
+		$this->translator = $translator;
+		return $this;
+	}
+
+	/**
+	 * Returns translate adapter.
+	 * @return Nette\ITranslator|NULL
+	 */
+	final public function getTranslator()
+	{
+		return $this->translator;
 	}
 
 	/**
@@ -107,17 +127,25 @@ class OpenIDForm extends Nette\Application\Control
 	public function handleProcess() {
 		$this->openid->returnUrl = $this->returnUrl( self::PROCESS_SIGNAL );
 		if( $this->openid->mode == 'cancel') {
-			$this->onCancel();
+			$msg = 'You have cancelled signing in!';
+			if ( $this->translator !== NULL ) {
+				$msg = $this->translator->translate( $msg );
+			}
+			$this[ self::FORM_COMPONENT ]->addError( $msg );
 		}
 		elseif( $this->openid->mode ) {
 			if ( $this->openid->validate() ) {
-				$this->onValid(
+				$this->onSignin(
 					$this->openid->identity,
 					$this->openid->getAttributes()
 				);
 			}
 			else {
-				$this->onInvalid();
+				$msg = 'Failed signing in!';
+				if ( $this->translator !== NULL ) {
+					$msg = $this->translator->translate( $msg );
+				}
+				$this[ self::FORM_COMPONENT ]->addError( $msg );
 			}
 		}
 	}
@@ -127,6 +155,9 @@ class OpenIDForm extends Nette\Application\Control
 	 */
 	public function createComponentIdentifierForm() {
 		$form = new AppForm;
+		if ( $this->translator ) {
+			$form->setTranslator( $this->translator );
+		}
 		$form->addText( self::OID_FIELD, 'Sign in with OpenID:')
 			->addRule( Nette\Forms\Form::FILLED, 'Please fill in your OpenID!' );
 		$form->addSubmit( 'login', 'Login' );
@@ -142,9 +173,13 @@ class OpenIDForm extends Nette\Application\Control
 		$values = $form->values;
 		$this->openid->identity = $values[ self::OID_FIELD ];
 		$this->openid->returnUrl = $this->returnUrl( self::PROCESS_SIGNAL );
-		
-		header( 'Location: ' . $this->openid->authUrl() );
-		exit();
+		try {	
+			header( 'Location: ' . $this->openid->authUrl() );
+			exit();
+		}
+		catch ( \ErrorException $e ) {
+			$form->addError( $e->getMessage() );
+		}
 	}
 
 	/**
