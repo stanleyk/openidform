@@ -18,6 +18,7 @@ class Users extends Nette\Object implements Security\IAuthenticator
         $row = dibi::select('*')
                 ->from( self::USERS_TABLE )
                 ->innerJoin( self::IDS_TABLE )
+                ->on('users.id = openids.user_id')
                 ->where( 'openid=%s', $openid )
                 ->fetch();
 

@@ -21,6 +21,12 @@ final class DefaultPresenter extends Nette\Application\Presenter
 {
 	const AX_NICKNAME = 'namePerson/friendly';
 
+    public function actionSignout() {
+        $this->user->logout();
+        $this->flashMessage("You've been logged out");
+        $this->redirect('default');
+    }
+
 	public function renderLogged() {
 		$user = Environment::getUser();
 		$this->template->user = $user->getIdentity();
@@ -98,7 +104,7 @@ final class DefaultPresenter extends Nette\Application\Presenter
 	public function processRegister( AppForm $form ) {
 		$values = $form->values;
 		\Model\Users::register( $values );
-		$this->user->login( $array( $values['openid'] ) );
+		$this->user->login( array( $values['openid'] ) );
 		$this->redirect( 'logged' );
 	}
 }

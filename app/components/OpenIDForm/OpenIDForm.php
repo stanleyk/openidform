@@ -35,11 +35,20 @@ class OpenIDForm extends Nette\Application\Control
 	 *  These functions are called when the user authentication succeeds */
 	public $onSignin;
 
+    /** @var string
+     * Message shown when user cancels signing in */
+    public $cancelMsg;
+
+    /** @var string
+     * Message shown when signing in goes wrong*/
+    public $errorMsg;
+
 	/** @var LightOpenID */
 	protected $openid;
 
 	/** @var Nette\ITranslator */
 	private $translator;
+
 
 	/**
 	 * Component constructor.
@@ -51,7 +60,9 @@ class OpenIDForm extends Nette\Application\Control
 	) {
 			parent::__construct( $parent, $name );
 
-			$this->openid = new \LightOpenID;
+			$this->openid    = new \LightOpenID;
+            $this->errorMsg  = 'You have cancelled signing in!';
+            $this->cancelMsg = 'Signing in failed!';
 	}
 
 	/**
@@ -125,29 +136,25 @@ class OpenIDForm extends Nette\Application\Control
 	 * This signal occurs after a successful redirection back from the OP
 	 */
 	public function handleProcess() {
+        if ( ! $this->openid->mode ) {
+            return;
+        }
+
+		if ( $this->openid->mode == 'cancel') {
+			$this[ self::FORM_COMPONENT ]->addError( $this->cancelMsg );
+            return;
+		}
+
 		$this->openid->returnUrl = $this->returnUrl( self::PROCESS_SIGNAL );
-		if( $this->openid->mode == 'cancel') {
-			$msg = 'You have cancelled signing in!';
-			if ( $this->translator !== NULL ) {
-				$msg = $this->translator->translate( $msg );
-			}
-			$this[ self::FORM_COMPONENT ]->addError( $msg );
-		}
-		elseif( $this->openid->mode ) {
-			if ( $this->openid->validate() ) {
-				$this->onSignin(
-					$this->openid->identity,
-					$this->openid->getAttributes()
-				);
-			}
-			else {
-				$msg = 'Failed signing in!';
-				if ( $this->translator !== NULL ) {
-					$msg = $this->translator->translate( $msg );
-				}
-				$this[ self::FORM_COMPONENT ]->addError( $msg );
-			}
-		}
+        if ( ! $this->openid->validate() ) {
+            $this[ self::FORM_COMPONENT ]->addError( $this->errorMsg );
+            return;
+        }
+
+        $this->onSignin(
+            $this->openid->identity,
+            $this->openid->getAttributes()
+        );
 	}
 
 	/**
