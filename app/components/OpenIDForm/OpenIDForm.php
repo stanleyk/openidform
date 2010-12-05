@@ -3,7 +3,7 @@
 /**
  * OpenID Authentication Form
  *
- * Copyright (c) 2010 Stanislav Kocanda (http://www.stanleyk.net)
+ * Copyright (c) 2010 Stanislav Kocanda (http://www.stanleyk.net), Miroslav Tynovsky
  *
  * @license http://www.opensource.org/licenses/mit-license.php MIT
  *
