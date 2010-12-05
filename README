@@ -14,6 +14,7 @@ PHP curl extension enabled
 
 Demo application
 ----------------
-Repository includes a demo application, to make it work please set the
-permissions of /temp, /log and /app/models/sql to 777 and permissions of
-/app/models/sql/demo.db to 666
+Repository includes a demo application, to make it work you have to:
+- set the permissions of /temp, /log and /app/models/sql to 777
+- set the permissions of /app/models/sql/demo.db to 666
+- add Nette and dibi libraries to /libs

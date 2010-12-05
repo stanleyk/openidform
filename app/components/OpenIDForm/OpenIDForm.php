@@ -18,7 +18,7 @@ use Nette\Application\AppForm;
 /**
  * OpenID Authentication Form control
  *
- * @author     Stanislav Kocanda
+ * @author     Stanislav Kocanda, Miroslav Tynovsky
  */
 class OpenIDForm extends Nette\Application\Control
 {
