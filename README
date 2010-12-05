@@ -1,0 +1,19 @@
+OpenIDForm Nette component
+======================
+
+Description
+-----------
+This component allows you to add the OpenID authentication to your Nette-powered
+application. It is based on the LightOpenID library, see
+http://gitorious.org/lightopenid for more info.
+
+Requirements
+------------
+Nette Framework 1.x or higher. (PHP 5.3 edition)
+PHP curl extension enabled
+
+Demo application
+----------------
+Repository includes a demo application, to make it work please set the
+permissions of /temp, /log and /app/models/sql to 777 and permissions of
+/app/models/sql/demo.db to 666
