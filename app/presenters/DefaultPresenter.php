@@ -34,10 +34,9 @@ final class DefaultPresenter extends Nette\Application\Presenter
 
 	public function renderRegister() {
 		$oidsession = Environment::getSession( 'openid' );
-		$nickname = '';
-		if ( isset( $oidsession->attributes[ self::AX_NICKNAME ] ) ) {
-			$nickname = $oidsession->attributes[ self::AX_NICKNAME ];
-		}
+		$nickname = ( isset( $oidsession->attributes[ self::AX_NICKNAME ] ) ) ?
+			$oidsession->attributes[ self::AX_NICKNAME ] : '';
+
 		if ( ! isset( $oidsession->identity ) ) {
 			throw Exception( 'Lost session!' );
 		}

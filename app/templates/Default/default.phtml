@@ -4,15 +4,6 @@
 <p><strong>{$msg}</strong></p>
 {/if}
 
-{if isset( $attributes ) }
-<p>Attributes obtained:</p>
-<ul>
-{foreach $attributes as $key => $attr}
-<li>{$key} => {$attr}</li>
-{/foreach}
-</ul>
-{/if}
-
 {widget openIDForm}
 
 {/block}

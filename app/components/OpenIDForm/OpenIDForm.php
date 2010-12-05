@@ -40,8 +40,16 @@ class OpenIDForm extends Nette\Application\Control
     public $cancelMsg;
 
     /** @var string
-     * Message shown when signing in goes wrong*/
+     * Message shown when signing in goes wrong */
     public $errorMsg;
+
+    /** @var string
+     * Label of the form field */
+    public $formLabel;
+
+    /** @var string
+     * Message shown if the form field is submitted empty */
+    public $formEmptyMsg;
 
 	/** @var LightOpenID */
 	protected $openid;
@@ -63,6 +71,8 @@ class OpenIDForm extends Nette\Application\Control
 			$this->openid    = new \LightOpenID;
             $this->errorMsg  = 'You have cancelled signing in!';
             $this->cancelMsg = 'Signing in failed!';
+			$this->formLabel = 'Sign in with OpenID:';
+			$this->formEmptyMsg = 'Please fill in your OpenID!';
 	}
 
 	/**
@@ -165,8 +175,8 @@ class OpenIDForm extends Nette\Application\Control
 		if ( $this->translator ) {
 			$form->setTranslator( $this->translator );
 		}
-		$form->addText( self::OID_FIELD, 'Sign in with OpenID:')
-			->addRule( Nette\Forms\Form::FILLED, 'Please fill in your OpenID!' );
+		$form->addText( self::OID_FIELD, $this->formLabel)
+			->addRule( Nette\Forms\Form::FILLED, $this->formEmptyMsg );
 		$form->addSubmit( 'login', 'Login' );
 		$form->onSubmit[] = array( $this, 'processIdentifier' );
 		return $form;

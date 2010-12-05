@@ -17,8 +17,5 @@
 	{foreach $flashes as $flash}<div class="flash {$flash->type}">{$flash->message}</div>{/foreach}
 
 	{include #content}
-	<p id="logged-in" n:if="$user->loggedIn">
-        Signed in as {$user->identity->nickname}.
-    </p>
 </body>
 </html>
